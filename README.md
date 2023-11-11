@@ -6,3 +6,7 @@ History of model accuracy on test set:
 -CNNvanilla, see CNNvanilla.ipynb, error on test set: 0.63
 <br>
 -Resnet with fine-tuning (128 layers), error on test set: 0.7
+<br>
+-ConvNextLarge fine-tuning(nicco metti layers), erro on test set 0.86
+
+For training use: convnext.ipynb for following the same preprocessing

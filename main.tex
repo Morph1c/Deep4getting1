@@ -1,0 +1,86 @@
+\documentclass[conference,compsoc,11pt]{IEEEtran}
+
+\usepackage{multirow}
+
+\usepackage[style=verbose]{biblatex}
+\addbibresource{./bibliography.bib}
+
+\ifCLASSINFOpdf
+\else
+\fi
+
+\usepackage{graphicx}
+\graphicspath{ {../misc/} }
+
+\begin{document}
+\title{Binary Image Classification:\\ Health state of plants
+\\ \large Artificial Neural Networks and Deep Learning -- A.Y. 2023/2024}
+
+\author{\IEEEauthorblockN{Roberto Giannini Braghè\IEEEauthorrefmark{1},
+Niccolo Grillo\IEEEauthorrefmark{2}, Filippo Lipari\IEEEauthorrefmark{3} and Andrea Toccaceli\IEEEauthorrefmark{4}}
+\IEEEauthorblockA{M.Sc. Mathematical Engineering,
+Politecnico di Milano - Milan, Italy\\
+Email: \IEEEauthorrefmark{1}roberto.giannini@mail.polimi.it,
+\IEEEauthorrefmark{2}niccolo.grillo@mail.polimi.it,
+\IEEEauthorrefmark{3}filippo.lipari@mail.polimi.it\\,
+\IEEEauthorrefmark{4}andrea.toccaceli@mail.polimi.it\\
+Student ID: \IEEEauthorrefmark{1}10612869,
+\IEEEauthorrefmark{2}10621873,
+\IEEEauthorrefmark{3}10630163,
+\IEEEauthorrefmark{4}10913674\\
+Codalab Group: 'Deep4getting'}
+}
+\maketitle
+
+%\begin{abstract}
+%\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+The given dataset consist of of 5200 images belonging to 2 different classes: Healthy and Unhealthy. We decide first of all to have a look at the dataset using some visualization code since the images are formatted in a \verb|.npz| file. After plotting some images we discover some outliers in the dataset in particular 98 images of Sherk and 98 images of Trololo and using correlation arguments we remove from the dataset.
+
+\subsection{Data Augmentation}
+
+
+\subsection{Pre-Processing}
+
+\section{First model: vanillaCNN}
+We decide to proceede in a bottom-up approach starting from a very tiny model in term of parameters size and increasing later the complexity of our model. Our starting point was a vanilla CNN composed of:
+
+Then, we turned to some pre-trained models to perform transfer learning. Given the reduced size of the dataset, we were quite sure this would greatly cut training time and increase performance.
+
+\subsection{Feature Extraction}\label{sec:features-extractor}
+
+
+\subsection{Classifier}
+
+\subsubsection{Global Average Pooling Layer}
+
+\subsubsection{Dense Layer and Activation}
+
+
+\subsubsection{Batch Normalization Layer}
+
+\subsubsection{Dropout Layer}
+
+\section{Training techniques}
+We find a very well implemented training techniques that implement an adaptive learning rate scheme called \verb|LR_ASK|
+\subsection{Fine-tuning}\label{sec:tuning}
+
+
+
+\subsection{Class imbalance}\label{sec:cl_imb}
+
+\section{Model choice}\label{sec:model-choice}
+
+
+\section{Conclusion}
+
+\subsection{Performance}
+
+
+\subsection{Further Developments}
+
+
+\end{document}

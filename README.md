@@ -13,4 +13,7 @@ History of model accuracy on test set:
 <br>
 -Contrastive Learning (base model: ConvNextBase), erro on test set ?
 
-For training use: convnext.ipynb for following the same preprocessing
+For augmentatiom: intro_code_tensor.ipynb for following the same preprocessing
+<br<
+For training pipeline: convnext.ipynb
+

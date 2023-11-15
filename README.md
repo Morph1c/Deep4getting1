@@ -12,6 +12,9 @@ History of model accuracy on test set:
 -ConvNextBase fine-tuning(64 layers), error on test set 0.86 differ from the previous on the data augmentattion part since we add brightness [0.5, 1.5] and noise
 <br>
 -Contrastive Learning (base model: ConvNextBase), erro on test set ?
+<br>
+-ConvNextBase fine-tuning(32 layers), error on test set 0.88
+<br>
 
 For augmentatiom: intro_code_tensor.ipynb for following the same preprocessing
 <br<

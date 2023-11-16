@@ -15,6 +15,9 @@ History of model accuracy on test set:
 <br>
 -ConvNextBase fine-tuning(32 layers), error on test set 0.88
 <br>
+-VGG16 fine-tuning(all layers), error on test set 0.72
+<br>
+
 
 For augmentatiom: intro_code_tensor.ipynb for following the same preprocessing
 <br<

@@ -20,6 +20,6 @@ History of model accuracy on test set:
 
 
 For augmentatiom: intro_code_tensor.ipynb for following the same preprocessing
-<br<
+<br>
 For training pipeline: convnext.ipynb
 

@@ -1,6 +1,8 @@
 \documentclass[conference,compsoc,11pt]{IEEEtran}
 
 \usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{float}
 
 \usepackage[style=verbose]{biblatex}
 \addbibresource{./bibliography.bib}
@@ -17,18 +19,20 @@
 \\ \large Artificial Neural Networks and Deep Learning -- A.Y. 2023/2024}
 
 \author{\IEEEauthorblockN{Roberto Giannini Braghè\IEEEauthorrefmark{1},
-Niccolo Grillo\IEEEauthorrefmark{2}, Filippo Lipari\IEEEauthorrefmark{3} and Andrea Toccaceli\IEEEauthorrefmark{4}}
+Niccolò Grillo\IEEEauthorrefmark{2}, Filippo Lipari\IEEEauthorrefmark{3} and Andrea Toccaceli\IEEEauthorrefmark{4}}
 \IEEEauthorblockA{M.Sc. Mathematical Engineering,
 Politecnico di Milano - Milan, Italy\\
 Email: \IEEEauthorrefmark{1}roberto.giannini@mail.polimi.it,
 \IEEEauthorrefmark{2}niccolo.grillo@mail.polimi.it,
 \IEEEauthorrefmark{3}filippo.lipari@mail.polimi.it\\,
 \IEEEauthorrefmark{4}andrea.toccaceli@mail.polimi.it\\
-Student ID: \IEEEauthorrefmark{1}10612869,
-\IEEEauthorrefmark{2}10621873,
+Student ID: \IEEEauthorrefmark{1}10705638,
+\IEEEauthorrefmark{2}10900895,
 \IEEEauthorrefmark{3}10630163,
 \IEEEauthorrefmark{4}10913674\\
-Codalab Group: 'Deep4getting'}
+Codalab Group: 'Deep4getting' \\
+GitHub code: https://github.com/Morph1c/Deep4getting1
+}
 }
 \maketitle
 
@@ -37,50 +41,126 @@ Codalab Group: 'Deep4getting'}
 
 \IEEEpeerreviewmaketitle
 
-\section{Introduction}
-The given dataset consist of of 5200 images belonging to 2 different classes: Healthy and Unhealthy. We decide first of all to have a look at the dataset using some visualization code since the images are formatted in a \verb|.npz| file. After plotting some images we discover some outliers in the dataset in particular 98 images of Sherk and 98 images of Trololo and using correlation arguments we remove from the dataset.
-
+\section{Abstract}
+The given dataset consisted of  5200 images of leaves belonging to 2 different classes: Healthy and Unhealthy. 
+In this report, we go through the steps and intuitions that allowed us to build the final classifiers. 
+Starting from a baseline, custom-made CNN model we followed an incremental approach, adding more and more complexity to the process, and assessed the results. In particular, we noticed the data augmentation to be the most crucial and  delicate part of the project. Transfer learning with fine-tuning and ensemble average of  the pre-trained models produced the best results in terms of accuracy. We also implemented methods like: Supervised Contrastive Learning, a customized learning rate scheduler, CNN with attention CBAM layers, and a class-activation map analysis. 
+\subsection{Data preprocessing}
+We are dealing with unbalanced classes: \verb|#Healthy = 3101, #Unhealthy = 1903|.  To tackle this problem we introduced 1198 new images of the class \textit{Unhealthy} obtained by applying some unique transformations to the existing ones. These transformations were: zooming (by a of 0.7), and flipping, so transformations that would not change or create new values of pixels that would otherwise introduce a bias in the models. To be noted that this kind of transformation was avoided in the data augmentation part to make the transformed images as unique as possible. 
+Also, we removed the images of  \textit{Shrek} and \textit{Trololo} from the dataset bringing us to a total number of images of \textit{6002} images perfectly balanced.
+We split the data into train and validation (0.15) and used the submission portal for testing. 
 \subsection{Data Augmentation}
+Now we switch our focus to image scarcity. First, we tried using Keras class \verb|ImageDataGenerator| for addressing augmentation using classical techniques like brightness, rotation, width and height shift, zoom range, and adding some noise. After training some initial models we inferred that data augmentation was crucial for improving the performance of our model so we decided to switch to a custom procedure, implementing other augmentation techniques: cutout, shearing, jitter, crop, color drop, and mixing all in a stochastic way, employing each one with different probability.  This new procedure greatly improved the performance of the models. 
+\\
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=7cm]{images/data_aug.png}
+    \caption{Examples of augmentations used on a sample image}
+    \label{fig:aug_imgs}
+\end{figure}
 
 
-\subsection{Pre-Processing}
+\section{Convolutional Neural Network}
+We decided to proceed in a bottom-up approach starting from a very tiny model. Our starting point was a vanilla CNN composed of multiple convolutional layers (32, 64, 128, 256, 512 number of filters), GlobalAveragePoolig (GAP) to better grasp the overall feature-extraction process and a Multi-layer-Perceptron network (MLP) made of 1 hidden layer of 128 neurons, dropout layer for preventing overfitting. Despite as a starting point is a quite complex network we got \verb|86%| on validation accuracy but \verb|63%| on phase 1 test accuracy.
 
-\section{First model: vanillaCNN}
-We decide to proceede in a bottom-up approach starting from a very tiny model in term of parameters size and increasing later the complexity of our model. Our starting point was a vanilla CNN composed of:
-
-Then, we turned to some pre-trained models to perform transfer learning. Given the reduced size of the dataset, we were quite sure this would greatly cut training time and increase performance.
-
-\subsection{Feature Extraction}\label{sec:features-extractor}
-
-
-\subsection{Classifier}
-
-\subsubsection{Global Average Pooling Layer}
-
-\subsubsection{Dense Layer and Activation}
-
-
-\subsubsection{Batch Normalization Layer}
-
-\subsubsection{Dropout Layer}
-
+\subsection{Attention layer}
+Moreover, we tried to employ an attention layer, with a CBAM structure after each convolution but we didn't appreciate an increase in terms of performance.
+\section{Pre-trained models - next phase}\label{sec:features-extractor}
+Given the low amount of data and poor results with a built-in CNN, we shifted towards making use of pre-built architectures taken from  \verb|Keras.applications| to finally construct a more robust model. 
 \section{Training techniques}
-We find a very well implemented training techniques that implement an adaptive learning rate scheme called \verb|LR_ASK|
-\subsection{Fine-tuning}\label{sec:tuning}
+We made use of a custom-made learning rate scheduler and stopping algorithm technique called \verb|LR_ASK| that consists of adding a callback function that enables the user, through an input window,  to decide after a fixed number of epochs whether to  stop the training or continue iterating and repeat that procedure. Moreover,  it changes  the learning rate adaptively: after each epoch, if the validation loss is above the lowest validation loss obtained so far then it resets the weights back to those of the one with the lowest loss and decreases the learning rate in an exponential manner. If instead, the validation loss found is the lowest so far the weights and the learning rate are left unchanged. 
+Inside the FCN's we used some regularization techniques like: dropout, batchnormalization, l1 and l2 regularization for the weights. 
+
+\subsection{Transfer Learning and Fine-tuning}
+Transfer learning combined with Fine-tuning was by far the most effective procedure for creating well-performing models. We equipped the pre-built architectures with a FCN made of a first layer of 256 neurons and second layer of  128 neurons depending on the results. In general, we saw no particular improvements in changing the structure of the FCN. \\
+We tested almost every architecture available in \verb|keras.applications| and we noticed that by far the most effective were: \verb|ConvNextBase| \
+\verb|ConvNextLarge| and \verb|ConvNextSmall|. \\
+For the fine-tuning, we followed a procedural approach that is as follows. First, unfreeze the first 32 layers and train the model, or even less layers depending on the model's size, then decrease the learning rate and increase the data augmentation, do the same for 64, 96, and 128 layers and see where it starts overfitting. When it does overfit the data, go back to the previous step or try to augment even more the training set and go on with the procedure.
+Indeed throughout the whole of this procedure, data augmentation was revealed to be the key instrument to beat overfitting and increase the model's accuracy. 
+
+\subsection{Supervised Contrastive Learning}\label{sec: tuning}
+Based on the paper by Chen et al. \footcite{contrastive}
+We implemented a lighter version of SCL than the one proposed in the paper. We first had to built an encoder with a projection head that would predict for every image a vector of 128 units (normalized). For the encoder structure, we were able to get good results only from the EfficientNetV2L and the Resnet152V2 architectures. 
+
+\begin{figure}[H]
+    \centering
+    \subfigure[]{\includegraphics[width=0.235\textwidth]{images/embedding_effnetV2L_trueandpred.png}} 
+    \subfigure[]{\includegraphics[width=0.235
+    \textwidth]{images/embedding_resnet152_truelabels.png}} 
+    \caption{(a) Embeddings generated by EffnetV2L (b) Embeddings generated by ResNet50}
+    \label{fig:EMBEDDINGS}
+\end{figure}
+
+To train the encoders with their projector head used heavy data augmentation, a big batch size of 128 (as suggested in the paper), and the \textit{Max-margin-contrastive-loss} as the loss function;
+% \begin{equation}
+% \begin{gathered}
+% \mathcal{L}^{\text {sup }}=\sum_{i=1}^{2 N} \mathcal{L}_i^{\text {sup }} \\
+% \mathcal{L}_i^{\text {sup }}=\frac{-1}{2 N_{\tilde{\boldsymbol{y}}_i}-1} \sum_{j=1}^{2 N} \mathbb{1}_{i \neq j} \cdot \mathbb{1}_{\tilde{\boldsymbol{y}}_i=\tilde{\boldsymbol{y}}_j} \cdot \log \frac{\exp \left(\boldsymbol{z}_i \cdot \boldsymbol{z}_j / \tau\right)}{\sum_{k=1}^{2 N} \mathbb{1}_{i \neq k} \cdot \exp \left(\boldsymbol{z}_i \cdot \boldsymbol{z}_k / \tau\right)}
+% \end{gathered}
+% \end{equation}
+this function tries to minimize the Euclidean distance of the encoded images belonging to the same class and maximize it for the ones belonging to different classes.  \\
+With the help of the \verb|TSNE| library, we were able to plot the embeddings in a 2D space of the 6020 images and see how well the backbone architectures could separate the two classes into clusters. 
+As we can see from figure 2. the \textit{EfficientNetV2L} (a) manages to divide the classes into two structured clusters. While \textit{Resnet50 }(b) is an example of a backbone that was not able to identify the two classes. 
+Then the next step consisted of tossing away the projector head and attaching (just as in transfer learning) a fully connected network on top of the trained encoder fixing the value of its weights. In this way we could obtain a new classifier. 
 
 
+\subsection{Ensemble Learning}
+As the last step of our procedure, we decided to merge two of the best models  trying to reduce the variance of the outputs of our networks in an ensemble way. In particular, Ensemble Learning \footcite{ensemble} involves training more than one network, then using each of the trained networks and combining each prediction in some way (weighted or normal average) to output a final score. In particular, we built two ensemble models: 1) \textit{ConvNextbase (Fine-Tuned all layers-3)} $+$\textit{ ConvNextLarge (Transfer-Learning)} and used a merged the two by taking the average of the output neurons 2) ConvNextBase (Fine-Tuned all layers-3), $+$SupCon (EffNetV2L) and $+$  (fine-tuned all) and merged the three by taking the weighted average (weights = (1,1,1.5)) of the output neurons.
 
-\subsection{Class imbalance}\label{sec:cl_imb}
 
 \section{Model choice}\label{sec:model-choice}
+ 
+Throughout the project, we collected the results of all our models in terms of validation accuracy.
+Despite the high performances on the validation test some of these models didn't perform well on the phase 1 test set like VGG16 which scored \verb|72%|. 
+In phase 2, we submitted the SCL model:  SupConv(EffNetV2L). This model obtained very high results in the validation set, with over 95\% of  accuracy,  but only a 75.1\%  although it seems to have problems with overfitting since its submission (phase 2) resulted in 75.1\% accuracy. While the ensemble models were the  most accurate ones, in fact Ensemble base+small+SCL got an \verb|85.1%| and ensemble  base+large  \verb|86.7%|.
+
+\begin{center}
+\begin{tabular}{||c c c ||} 
+ \hline
+ Model & val-acc&ph2-acc\\ [0.5ex] 
+ \hline\hline
+ ConvNextbase & 96.13\%&86.20\%\\ 
+ \hline
+ ConvNextsmall & 93.30\%&--\%\\
+ \hline
+ ConvNextlarge & 91.84\%&--\%\\
+ \hline
+ Ensemble base-large & 96.24\%&86.70\%\\
+ \hline
+ Ensemble small-base-contrastive & 97.61\%&85.10\%\\
+ \hline
+ Contrastive(EffNetV2L) & 95.47\%&75.10\%\\
+ \hline
+ VGG16 & 88.51\%&72.00\%\\
+ \hline
+ ConvNextXlarge & 93.87\%&82.00\%\\
+\hline
+Ensemble effV2L-convbase & 96.24\% & --\%\\
+\hline
+ 
+\end{tabular}
+\end{center}
+
+\subsection{Explainability of the model}
+To understand what ConvNextBase learned from the training phase we put a dense classifier after its GMP at the end of the net, and take the weights of the winning class. Deducing the transferred net output we found the pixels that were activating more the class.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{images/CAM8.png}
+    \caption{Activation map of convnext base}
+    \label{fig:heatmap}
+\end{figure}
 
 
 \section{Conclusion}
+Building a CNN from scratch was not a viable option for tackling this challenge, while transfer learning, and fine-tuning, proved to be more effective. Also, the tweaking and improving of the data augmentation techniques was crucial since it's what allowed us to overcome the problem of overfitting, and even small changes in the functions used proved to have a significant effect on the overall results. Also from the literature we expected great improvements in performances when using contrastive learning,this didn't happen we assume that our pipeline for contrastive learning can be further improved. 
 
-\subsection{Performance}
 
 
-\subsection{Further Developments}
+\section{Contributions}
+Given the complexity of the project we decided to split the activities in order to grasp a fully comprensive view of the work. Niccolo and Roberto were the trainer's masters while Andrea was the github boss that managed all the proceeding of the projects and Filippo was the plots' specialist. At the end every piece of the work of each one was crucial for having the optimal outcome of the results.
+
 
 
 \end{document}
+
